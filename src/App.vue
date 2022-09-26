@@ -4,7 +4,15 @@
     <button @click="animateBlock">Animate</button>
   </div>
   <div class="container">
-    <transition name="paragraph">
+    <transition
+      name="paragraph"
+      @before-enter="beforeEnter"
+      @enter="enter"
+      @before-leave="beforeLeave"
+      @leave="leave"
+      @enter-cancelled="enterCancelled"
+      @leave-cancelled="leaveCancelled"
+    >
       <p v-if="paragraphIsVisible">Sometimes visible</p>
     </transition>
     <button @click="showParagraph">Toggle Paragraph</button>
@@ -32,9 +40,48 @@ export default {
       dialogIsVisible: false,
       blockIsAnimated: false,
       paragraphIsVisible: false,
+      enterInterval: null,
+      leaveInterval: null,
     };
   },
   methods: {
+    beforeEnter(el) {
+      console.log('beforeEnter');
+      console.log(el);
+      el.style.opacity = 0;
+    },
+    enter(el, done) {
+      let i = 1;
+      this.enterInterval = setInterval(() => {
+        el.style.opacity = i * 0.1;
+        i++;
+        if (i > 10) {
+          clearInterval(this.enterInterval);
+          done();
+        }
+      }, 60);
+    },
+    beforeLeave(el) {
+      console.log('beforeLeave');
+      el.style.opacity = 1;
+    },
+    leave(el, done) {
+      let i = 1;
+      this.leaveInterval = setInterval(() => {
+        el.style.opacity = 1 - i * 0.1;
+        i++;
+        if (i > 10) {
+          clearInterval(this.leaveInterval);
+          done();
+        }
+      }, 60);
+    },
+    enterCancelled() {
+      clearInterval(this.enterInterval);
+    },
+    leaveCancelled() {
+      clearInterval(this.leaveInterval);
+    },
     show() {
       this.visible = true;
     },
@@ -124,36 +171,6 @@ button:active {
   animation: slide-scale 0.3s ease-out forwards;
   transform: translateY(-30px);
 }
-
-/* .v-enter-from {
-  opacity: 0;
-  transform: translateY(-30px);
-} */
-
-.paragraph-enter-active {
-  /* transition: all 0.6s ease-out; */
-  animation: slide-scale 0.6s ease-in;
-}
-
-/* .v-enter-to {
-  opacity: 1;
-  transform: translateY(0);
-} */
-/* 
-.v-leave-from {
-  opacity: 1;
-  transform: translateY(0px);
-} */
-
-.paragraph-leave-active {
-  /* transition: all 0.6s ease-in; */
-  animation: slide-scale 0.6s ease-out;
-}
-
-/* .v-leave-to {
-  opacity: 0;
-  transform: translateY(30px);
-} */
 
 @keyframes slide-scale {
   0% {
