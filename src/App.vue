@@ -5,6 +5,7 @@
   </div>
   <div class="container">
     <transition
+      css="false"
       name="paragraph"
       @before-enter="beforeEnter"
       @enter="enter"
